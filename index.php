@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if(!empty($_POST['g-recaptcha-response']))
     {
-        $secret = '6LetwdgeAAAAAG18vTb-rmrBqVixVx-IsCKyTE-C';
+        $secret = 'secret-key';
         $verifyResponse = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret='.$secret.'&response='.$_POST['g-recaptcha-response']);
         $responseData = json_decode($verifyResponse);
         if($responseData->success)
@@ -186,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <?php echo isset($recaptchaError)? '<span class="alert alert-danger custom-alert"> Error '.$recaptchaError.'</span>':''; ?>
             </div>
             <div class="form-group">
-            <div class="g-recaptcha" data-sitekey="6LetwdgeAAAAAPBnEGcVvZQ30rAvcmIXWLbNmVCe"></div>
+            <div class="g-recaptcha" data-sitekey="site-key"></div>
             </div>
 
             <!-- 6LetwdgeAAAAAG18vTb-rmrBqVixVx-IsCKyTE-C -->
