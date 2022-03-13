@@ -1,15 +1,27 @@
 <?php
 
+//Import PHPMailer classes into the global namespace
+//These must be at the top of your script, not inside a function
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
+
+//Load Composer's autoloader
+require 'vendor/autoload.php';
+
 // Check if User Coming From A Request
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
-    // Assign Variables
+    // Instantiation and passing `true` enables exceptions
+    $mailer = new PHPMailer(true);
+
+      // Assign Variables
     $user = filter_var($_POST['username'], FILTER_SANITIZE_STRING);
     $mail = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
     $cell = filter_var($_POST['cellphone'], FILTER_SANITIZE_NUMBER_INT);
     $msg  = filter_var($_POST['message'], FILTER_SANITIZE_STRING);
 
-    // Creating Array of Errors
+     // Creating Array of Errors
     $formErrors = array();
     if (strlen($user) <= 3) {
         $formErrors[] = 'Username Must Be Larger Than <strong>3</strong> Characters';
@@ -21,20 +33,57 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // If No Errors Send The Email [ mail(To, Subject, Message, Headers, Parameters) ]
 
     $headers = 'From: ' . $mail . '\r\n';
-    $myEmail = 'kamalkafi12@gmail.com';
+    $myEmail = 'your email';
     $subject = 'Contact Form';
 
+
+    $to ='mail to send to ';
     if (empty($formErrors)) {
 
-        mail($myEmail, $subject, $msg, $headers);
+    try {
+        //Server settings
+        // $mailer->SMTPDebug = SMTP::DEBUG_SERVER;                      // Enable verbose debug output
+        $mailer->isSMTP();                                            // Send using SMTP
+        $mailer->Host       = 'smtp.gmail.com';                    // Set the SMTP server to send through
+        $mailer->SMTPAuth   = true;                                   // Enable SMTP authentication
+        $mailer->Username   = $myEmail;                     // SMTP username
+        $mailer->Password   ='your password';                               // SMTP password
+        $mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;         // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
+        $mailer->Port       = 587;                                    // TCP port to connect to, use 465 for `PHPMailer::ENCRYPTION_SMTPS` above
 
-        $user = '';
-        $mail = '';
-        $cell = '';
-        $msg = '';
+        //Recipients
+        $mailer->setFrom($to, 'Forget Password');
+        $mailer->addAddress($to,$headers);     // Add a recipient
+        // $mailer->addAddress('ellen@example.com');               // Name is optional
+        $mailer->addReplyTo('email to replay to', 'Information');
+        // $mailer->addCC('cc@example.com');
+        // $mailer->addBCC('bcc@example.com');
 
-        $success = '<div class="alert alert-success">We Have Recieved Your Message</div>';
+        // Attachments
+        // $mailer->addAttachment('/var/tmp/file.tar.gz');         // Add attachments
+        // $mailer->addAttachment('/tmp/image.jpg', 'new.jpg');    // Optional name
+
+        // Content
+        $mailer->isHTML(true);                                  // Set email format to HTML
+        $mailer->Subject = $subject . ' from ' .$user;
+        $mailer->Body    = $msg ;
+        $mailer->AltBody = '';
+
+        $mailer->send();
+
+            $user = '';
+            $mail = '';
+            $cell = '';
+            $msg = '';
+
+            $success = '<div class="alert alert-success">We Have Recieved Your Message</div>';
+        
+
+    } catch (Exception $e) {
+        $success = '<div class="alert alert-danger">خطأ</div>';
+        echo  $mailer->ErrorInfo;
     }
+}
 }
 ?>
 
@@ -53,8 +102,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
-          <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-          <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
         <![endif]-->
 </head>
 
