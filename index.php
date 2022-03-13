@@ -33,11 +33,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // If No Errors Send The Email [ mail(To, Subject, Message, Headers, Parameters) ]
 
     $headers = 'From: ' . $mail . '\r\n';
-    $myEmail = 'your email';
+    $myEmail = 'email to send from';
     $subject = 'Contact Form';
 
 
-    $to ='mail to send to ';
+    $to ='email to send to ';
+
+
+    if(!empty($_POST['g-recaptcha-response']))
+    {
+        $secret = '6LetwdgeAAAAAG18vTb-rmrBqVixVx-IsCKyTE-C';
+        $verifyResponse = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret='.$secret.'&response='.$_POST['g-recaptcha-response']);
+        $responseData = json_decode($verifyResponse);
+        if($responseData->success)
+            {
+
     if (empty($formErrors)) {
 
     try {
@@ -47,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $mailer->Host       = 'smtp.gmail.com';                    // Set the SMTP server to send through
         $mailer->SMTPAuth   = true;                                   // Enable SMTP authentication
         $mailer->Username   = $myEmail;                     // SMTP username
-        $mailer->Password   ='your password';                               // SMTP password
+        $mailer->Password   = 'your password';                               // SMTP password
         $mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;         // Enable TLS encryption; `PHPMailer::ENCRYPTION_SMTPS` encouraged
         $mailer->Port       = 587;                                    // TCP port to connect to, use 465 for `PHPMailer::ENCRYPTION_SMTPS` above
 
@@ -55,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $mailer->setFrom($to, 'Forget Password');
         $mailer->addAddress($to,$headers);     // Add a recipient
         // $mailer->addAddress('ellen@example.com');               // Name is optional
-        $mailer->addReplyTo('email to replay to', 'Information');
+        $mailer->addReplyTo('mail to replay to', 'Information');
         // $mailer->addCC('cc@example.com');
         // $mailer->addBCC('bcc@example.com');
 
@@ -84,6 +94,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo  $mailer->ErrorInfo;
     }
 }
+            }
+        else
+            $message = "Some error in vrifying g-recaptcha";
+        echo $message;
+    } else{
+        $recaptchaError = 'reCaptcha Error';
+    }
+
+
+
 }
 ?>
 
@@ -162,13 +182,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     Message Can\'t Be Less Than <strong>10</strong> Characters
                 </div>
             </div>
+            <div class="form-group">
+            <?php echo isset($recaptchaError)? '<span class="alert alert-danger custom-alert"> Error '.$recaptchaError.'</span>':''; ?>
+            </div>
+            <div class="form-group">
+            <div class="g-recaptcha" data-sitekey="6LetwdgeAAAAAPBnEGcVvZQ30rAvcmIXWLbNmVCe"></div>
+            </div>
+
+            <!-- 6LetwdgeAAAAAG18vTb-rmrBqVixVx-IsCKyTE-C -->
             <input class="btn btn-success" type="submit" value="Send Message" />
             <i class="fa fa-send fa-fw send-icon"></i>
         </form>
     </div>
 
     <!-- End Form -->
-
+    <script src='https://www.google.com/recaptcha/api.js' async defer ></script>
     <script src="js/jquery-1.12.4.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/custom.js"></script>
